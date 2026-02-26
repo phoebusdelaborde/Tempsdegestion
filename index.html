@@ -382,8 +382,17 @@ function defaultState() {
   };
 }
 let S = defaultState();
-function save() { try { localStorage.setItem('gts3',JSON.stringify(S)); } catch(e){} }
-function load() { try { const d=localStorage.getItem('gts3'); if(d){ const p=JSON.parse(d); S=Object.assign(defaultState(),p); } } catch(e){} }
+
+// localStorage avec fallback mémoire si bloqué
+let _lsOk = false;
+try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); _lsOk=true; } catch(e){}
+
+function save() {
+  if(_lsOk) { try { localStorage.setItem('gts3',JSON.stringify(S)); } catch(e){ _lsOk=false; } }
+}
+function load() {
+  if(_lsOk) { try { const d=localStorage.getItem('gts3'); if(d){ S=Object.assign(defaultState(),JSON.parse(d)); } } catch(e){ _lsOk=false; } }
+}
 load();
 
 // ── NAVIGATION ──
