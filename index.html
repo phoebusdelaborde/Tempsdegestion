@@ -382,9 +382,26 @@ function defaultState() {
   };
 }
 let S = defaultState();
-function save() { try { localStorage.setItem('gts3',JSON.stringify(S)); } catch(e){} }
-function load() { try { const d=localStorage.getItem('gts3'); if(d){ const p=JSON.parse(d); S=Object.assign(defaultState(),p); } } catch(e){} }
-load();
+
+async function save() {
+  try { await window.storage.set('gts3', JSON.stringify(S)); } catch(e){}
+}
+
+async function loadData() {
+  try {
+    const d = await window.storage.get('gts3');
+    if(d && d.value){ const p=JSON.parse(d.value); S=Object.assign(defaultState(),p); }
+  } catch(e){}
+}
+
+async function initApp() {
+  await loadData();
+  pomCount=S.pomodoroCount||0;
+  renderHome();
+  updateTimerDisplay();
+  renderTimerSessions();
+  setInterval(()=>{ if(currentPage==='home') renderHome(); },30000);
+}
 
 // ── NAVIGATION ──
 let currentPage='home';
@@ -827,7 +844,7 @@ function exportData(){
   URL.revokeObjectURL(url); toast('Export téléchargé ✓');
 }
 function confirmReset(){
-  confirmAction('⚠️ Supprimer TOUTES les données ? Action irréversible.',()=>{ localStorage.removeItem('gts3'); S=defaultState(); save(); closeOverlay(); renderHome(); renderProfile(); renderTasks(); renderSchedule(); renderTimerSessions(); toast('Application réinitialisée'); });
+  confirmAction('⚠️ Supprimer TOUTES les données ? Action irréversible.',async()=>{ try{ await window.storage.delete('gts3'); }catch(e){} S=defaultState(); save(); closeOverlay(); renderHome(); renderProfile(); renderTasks(); renderSchedule(); renderTimerSessions(); toast('Application réinitialisée'); });
 }
 
 // ── OVERLAY / SHEET ──
@@ -850,11 +867,7 @@ function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
 function v(id){ return document.getElementById(id)?.value||''; }
 
 // ── INIT ──
-pomCount=S.pomodoroCount||0;
-renderHome();
-updateTimerDisplay();
-renderTimerSessions();
-setInterval(()=>{ if(currentPage==='home') renderHome(); },30000);
+initApp();
 </script>
 </body>
 </html>
