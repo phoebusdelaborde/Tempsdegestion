@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Gestion du Temps Scolaire</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #2563EB;
+  --blue-dark: #1D4ED8;
+  --blue-light: #EFF6FF;
+  --blue-mid: #BFDBFE;
+  --text: #0F172A;
+  --text-soft: #64748B;
+  --white: #FFFFFF;
+  --bg: #F1F5F9;
+  --card: #FFFFFF;
+  --border: #E2E8F0;
+  --radius: 18px;
+  --green: #16A34A; --green-bg: #DCFCE7;
+  --orange: #D97706; --orange-bg: #FEF3C7;
+  --red: #DC2626; --red-bg: #FEE2E2;
+  --purple: #7C3AED; --purple-bg: #F3E8FF;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { height:100%; font-family:'Outfit',sans-serif; }
+body {
+  background: linear-gradient(135deg,#1E40AF 0%,#3B82F6 60%,#60A5FA 100%);
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+}
+.phone {
+  width:393px; height:852px; background:var(--bg); border-radius:52px; overflow:hidden;
+  box-shadow:0 50px 100px rgba(0,0,0,.45),0 0 0 11px rgba(255,255,255,.12),inset 0 0 0 2px rgba(255,255,255,.2);
+  display:flex; flex-direction:column; position:relative;
+}
+.sbar { background:white; padding:14px 28px 0; display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:700; color:var(--text); flex-shrink:0; }
+.sbar-right { display:flex; gap:5px; align-items:center; }
+.notch { width:126px; height:36px; background:#0a0a0a; border-radius:0 0 22px 22px; margin:0 auto; }
+.screen { flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--bg); }
+.pages { flex:1; overflow:hidden; position:relative; }
+.page { position:absolute; inset:0; overflow-y:auto; scrollbar-width:none; padding:22px 18px 16px; opacity:0; pointer-events:none; transform:translateY(12px); transition:opacity .25s,transform .25s; }
+.page::-webkit-scrollbar { display:none; }
+.page.active { opacity:1; pointer-events:all; transform:translateY(0); }
+.page-title { font-family:'DM Serif Display',serif; font-size:26px; line-height:1.15; color:var(--text); margin-bottom:2px; }
+.page-sub { font-size:13px; color:var(--text-soft); margin-bottom:20px; font-weight:400; }
+.section-title { font-size:15px; font-weight:700; color:var(--text); margin:18px 0 10px; }
+.card { background:var(--card); border-radius:var(--radius); padding:16px; border:1.5px solid var(--border); transition:transform .15s; }
+.card:active { transform:scale(.98); }
+.card-blue { background:var(--blue); border-color:var(--blue); color:white; }
+.card-light { background:var(--blue-light); border-color:var(--blue-mid); }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.card-label { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; opacity:.65; margin-bottom:3px; }
+.card-num { font-size:40px; font-weight:800; line-height:1; }
+.card-num-sm { font-size:28px; font-weight:700; line-height:1; }
+.blob { position:absolute; right:-16px; bottom:-16px; width:80px; height:80px; background:rgba(255,255,255,.13); border-radius:50%; pointer-events:none; }
+.pbar { height:5px; background:rgba(255,255,255,.25); border-radius:10px; margin-top:10px; overflow:hidden; }
+.pbar-fill { height:100%; border-radius:10px; background:white; transition:width .6s ease; }
+.pbar-wrap { background:#E2E8F0; } .pbar-wrap .pbar-fill { background:var(--blue); }
+.tag { padding:3px 9px; border-radius:20px; font-size:11px; font-weight:600; display:inline-flex; align-items:center; gap:4px; }
+.tag-blue { background:var(--blue-light); color:var(--blue); }
+.tag-green { background:var(--green-bg); color:var(--green); }
+.tag-orange { background:var(--orange-bg); color:var(--orange); }
+.tag-red { background:var(--red-bg); color:var(--red); }
+.tag-purple { background:var(--purple-bg); color:var(--purple); }
+.btn { border:none; border-radius:12px; padding:13px 24px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Outfit',sans-serif; transition:transform .15s; }
+.btn:active { transform:scale(.96); }
+.btn-primary { background:var(--blue); color:white; }
+.btn-outline { background:var(--blue-light); color:var(--blue); }
+.btn-danger { background:var(--red-bg); color:var(--red); }
+.btn-full { width:100%; margin-top:8px; }
+.btn-sm { padding:8px 16px; font-size:13px; border-radius:10px; }
+.nav { background:white; border-top:1px solid var(--border); display:flex; justify-content:space-around; align-items:flex-end; padding:8px 0 20px; flex-shrink:0; }
+.nav-btn { display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; font-weight:600; color:var(--text-soft); background:none; border:none; cursor:pointer; font-family:'Outfit',sans-serif; transition:color .2s; min-width:52px; }
+.nav-btn.active { color:var(--blue); }
+.nav-btn svg { width:22px; height:22px; }
+.nav-center { width:52px; height:52px; background:var(--blue); border-radius:16px; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer; box-shadow:0 4px 18px rgba(37,99,235,.45); margin-bottom:4px; transition:transform .15s; }
+.nav-center:active { transform:scale(.92); }
+.overlay { position:absolute; inset:0; background:rgba(0,0,0,.4); backdrop-filter:blur(2px); z-index:100; opacity:0; pointer-events:none; transition:opacity .25s; border-radius:52px; overflow:hidden; }
+.overlay.open { opacity:1; pointer-events:all; }
+.sheet { position:absolute; bottom:0; left:0; right:0; background:white; border-radius:28px 28px 0 0; padding:20px 20px 36px; transform:translateY(100%); transition:transform .3s cubic-bezier(.34,1.1,.64,1); max-height:85%; overflow-y:auto; scrollbar-width:none; }
+.sheet::-webkit-scrollbar { display:none; }
+.overlay.open .sheet { transform:translateY(0); }
+.sheet-handle { width:40px; height:4px; background:#E2E8F0; border-radius:10px; margin:0 auto 18px; }
+.sheet-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:16px; }
+.field { margin-bottom:14px; }
+.field label { display:block; font-size:12px; font-weight:700; color:var(--text-soft); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
+.field input, .field select, .field textarea { width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:12px; font-size:15px; font-family:'Outfit',sans-serif; color:var(--text); background:var(--bg); outline:none; transition:border-color .2s; -webkit-appearance:none; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color:var(--blue); background:white; }
+.field textarea { resize:none; height:80px; }
+.color-row { display:flex; gap:8px; flex-wrap:wrap; }
+.color-dot { width:30px; height:30px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:transform .15s, border-color .15s; }
+.color-dot.selected { border-color:var(--text); transform:scale(1.15); }
+.sched-item { display:flex; align-items:center; gap:12px; padding:12px 14px; background:var(--card); border-radius:14px; margin-bottom:8px; border:1.5px solid var(--border); cursor:pointer; transition:transform .15s; }
+.sched-item:active { transform:scale(.98); }
+.sched-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.sched-time { font-size:12px; color:var(--text-soft); min-width:46px; font-weight:600; }
+.sched-name { font-size:14px; font-weight:700; color:var(--text); }
+.sched-sub { font-size:11px; color:var(--text-soft); }
+.icon-btn { background:none; border:none; cursor:pointer; font-size:15px; padding:4px 6px; border-radius:8px; }
+.icon-btn:hover { background:var(--bg); }
+.day-scroll { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:4px; margin-bottom:16px; }
+.day-scroll::-webkit-scrollbar { display:none; }
+.day-pill { flex:0 0 auto; text-align:center; padding:10px 14px; border-radius:14px; cursor:pointer; transition:all .2s; font-weight:600; }
+.day-pill .d-name { font-size:10px; text-transform:uppercase; letter-spacing:.08em; }
+.day-pill .d-num { font-size:22px; font-weight:800; }
+.day-pill.active { background:var(--blue); color:white; }
+.day-pill:not(.active) { color:var(--text-soft); }
+.task-item { display:flex; align-items:center; gap:12px; padding:13px 14px; background:var(--card); border-radius:14px; margin-bottom:8px; border:1.5px solid var(--border); transition:transform .15s; }
+.task-check { width:24px; height:24px; border-radius:8px; border:2px solid var(--blue-mid); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .2s; color:white; font-size:13px; cursor:pointer; }
+.task-check.done { background:var(--blue); border-color:var(--blue); }
+.task-body { flex:1; min-width:0; }
+.task-name { font-size:14px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.task-name.done { text-decoration:line-through; color:var(--text-soft); }
+.task-meta { font-size:11px; color:var(--text-soft); margin-top:2px; }
+.timer-modes { display:flex; background:var(--blue-light); border-radius:14px; padding:4px; gap:4px; margin-bottom:24px; }
+.mode-btn { flex:1; padding:9px 4px; border:none; border-radius:10px; font-family:'Outfit',sans-serif; font-weight:700; font-size:12px; color:var(--blue); background:transparent; cursor:pointer; transition:all .2s; }
+.mode-btn.active { background:var(--blue); color:white; }
+.timer-ring { position:relative; display:flex; justify-content:center; margin-bottom:8px; }
+.timer-inner { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; width:160px; }
+.timer-digits { font-size:44px; font-weight:800; color:var(--text); line-height:1; }
+.timer-label { font-size:12px; color:var(--text-soft); margin-top:4px; }
+.pomodoro-dots { display:flex; justify-content:center; gap:8px; margin:16px 0 24px; }
+.pom-dot { width:12px; height:12px; border-radius:50%; background:var(--blue-mid); transition:background .3s; }
+.pom-dot.done { background:var(--blue); }
+.timer-btns { display:flex; gap:10px; justify-content:center; }
+.avatar-wrap { text-align:center; padding:20px 0 10px; }
+.avatar { width:80px; height:80px; border-radius:50%; background:var(--blue); margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:34px; cursor:pointer; border:4px solid white; box-shadow:0 4px 20px rgba(37,99,235,.3); transition:transform .2s; }
+.avatar:active { transform:scale(.95); }
+.profile-name { font-size:20px; font-weight:800; color:var(--text); }
+.profile-school { font-size:13px; color:var(--text-soft); }
+.stat-row { display:flex; gap:10px; margin:14px 0; }
+.stat-box { flex:1; background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius); padding:14px; text-align:center; }
+.stat-num { font-size:26px; font-weight:800; color:var(--blue); }
+.stat-lab { font-size:11px; color:var(--text-soft); font-weight:600; margin-top:2px; }
+.subject-item { display:flex; align-items:center; gap:12px; padding:12px 14px; background:var(--card); border-radius:14px; margin-bottom:8px; border:1.5px solid var(--border); }
+.subject-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+.subject-name { font-size:14px; font-weight:700; color:var(--text); flex:1; }
+.grade-bar-wrap { width:80px; height:7px; background:var(--bg); border-radius:4px; overflow:hidden; }
+.grade-bar { height:100%; border-radius:4px; transition:width .6s; }
+.grade-val { font-size:13px; font-weight:700; min-width:40px; text-align:right; }
+.bar-chart { display:flex; align-items:flex-end; gap:6px; height:72px; margin-top:14px; }
+.bar-col { display:flex; flex-direction:column; align-items:center; gap:4px; flex:1; }
+.bar-rect { width:100%; border-radius:6px 6px 0 0; background:var(--blue); }
+.bar-lbl { font-size:10px; color:var(--text-soft); font-weight:600; }
+.empty { text-align:center; padding:36px 20px; color:var(--text-soft); }
+.empty-icon { font-size:44px; margin-bottom:12px; }
+.empty-text { font-size:14px; font-weight:500; line-height:1.5; }
+.toast { position:absolute; bottom:88px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--text); color:white; padding:10px 18px; border-radius:12px; font-size:13px; font-weight:600; opacity:0; transition:all .3s; white-space:nowrap; z-index:200; pointer-events:none; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+.anim { animation:fadeUp .35s ease both; }
+</style>
+</head>
+<body>
+<div class="phone" id="app">
+  <div style="background:white;flex-shrink:0;">
+    <div class="sbar">
+      <span id="clock-time">9:41</span>
+      <div class="notch"></div>
+      <div class="sbar-right">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="8" width="3" height="12" rx="1"/><rect x="7" y="5" width="3" height="15" rx="1"/><rect x="12" y="2" width="3" height="18" rx="1"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+        <svg width="22" height="13" viewBox="0 0 24 13" fill="currentColor"><rect x="0" y="1" width="20" height="11" rx="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="2" y="3" width="14" height="7" rx="1.2"/><path d="M22 4.5v4c1.1-.5 1.1-3.5 0-4z"/></svg>
+      </div>
+    </div>
+  </div>
+  <div class="screen">
+    <div class="pages">
+
+      <!-- HOME -->
+      <div class="page active" id="page-home">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+          <div class="page-title">Gestion du<br>Temps Scolaire</div>
+          <div style="width:42px;height:42px;background:var(--blue);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer" onclick="showPage('profile')" id="home-avatar-btn">🎓</div>
+        </div>
+        <div class="page-sub" id="home-greeting">Bonjour !</div>
+        <div class="grid2">
+          <div class="card card-blue anim" onclick="showPage('timer')" style="position:relative;overflow:hidden;cursor:pointer">
+            <div class="card-label">Cours actuel</div>
+            <div id="home-current-course" style="font-size:12px;opacity:.75;margin-bottom:4px">—</div>
+            <div id="home-remaining" class="card-num" style="font-size:34px">—</div>
+            <div class="pbar" id="home-pbar"><div class="pbar-fill" id="home-pbar-fill" style="width:0%"></div></div>
+            <div style="margin-top:10px;display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.2);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700">▶ Minuteur</div>
+            <div class="blob"></div>
+          </div>
+          <div class="card anim" style="overflow:hidden">
+            <div class="card-label">Heure actuelle</div>
+            <div id="home-time" class="card-num-sm" style="margin-bottom:4px">—</div>
+            <div style="display:flex;justify-content:center;padding:4px 0">
+              <svg id="home-clock-svg" width="88" height="88" viewBox="0 0 88 88">
+                <circle cx="44" cy="44" r="38" fill="none" stroke="#BFDBFE" stroke-width="7"/>
+                <circle cx="44" cy="44" r="38" fill="none" stroke="#2563EB" stroke-width="7" stroke-dasharray="238.76" stroke-dashoffset="0" stroke-linecap="round" id="clock-arc" transform="rotate(-90 44 44)"/>
+                <line id="clock-hour" x1="44" y1="44" x2="44" y2="20" stroke="#0F172A" stroke-width="3" stroke-linecap="round"/>
+                <line id="clock-min" x1="44" y1="44" x2="44" y2="14" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="44" cy="44" r="4" fill="#2563EB"/>
+              </svg>
+            </div>
+          </div>
+          <div class="card card-light anim" style="cursor:pointer" onclick="showPage('tasks')">
+            <div class="card-label" style="color:var(--blue)">Tâches restantes</div>
+            <div id="home-tasks-num" class="card-num-sm" style="color:var(--text);margin:4px 0">0</div>
+            <div id="home-tasks-sub" style="font-size:11px;color:var(--text-soft)">restantes</div>
+            <div style="height:5px;background:var(--blue-mid);border-radius:10px;margin-top:10px;overflow:hidden"><div id="home-tasks-pbar" style="height:100%;background:var(--blue);width:0%;border-radius:10px;transition:width .6s"></div></div>
+          </div>
+          <div class="card anim" style="cursor:pointer" onclick="showPage('profile')">
+            <div class="card-label">Aujourd'hui</div>
+            <div id="home-study-time" class="card-num-sm" style="margin:4px 0">0min</div>
+            <div style="font-size:11px;color:var(--text-soft)">temps d'étude</div>
+            <div style="font-size:10px;color:var(--blue);margin-top:6px;font-weight:700">Voir profil →</div>
+          </div>
+        </div>
+        <div class="card anim" style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:700;font-size:15px;color:var(--text)">Semaine</div>
+            <div style="font-size:11px;color:var(--text-soft)" id="home-week-total">0h cette semaine</div>
+          </div>
+          <div class="bar-chart" id="home-bar-chart"></div>
+        </div>
+        <div class="section-title" style="margin-top:4px">Prochains cours</div>
+        <div id="home-next-courses"></div>
+      </div>
+
+      <!-- SCHEDULE -->
+      <div class="page" id="page-schedule">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div class="page-title">Emploi du<br>temps</div>
+          <button class="btn btn-primary btn-sm" onclick="openAddCourse()">+ Ajouter</button>
+        </div>
+        <div class="page-sub" id="sched-date">—</div>
+        <div class="day-scroll" id="day-scroll"></div>
+        <div id="schedule-list"></div>
+      </div>
+
+      <!-- TIMER -->
+      <div class="page" id="page-timer">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+          <div class="page-title">Minuteur<br>Focus</div>
+          <div style="width:42px;height:42px;background:var(--blue-light);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">⏱</div>
+        </div>
+        <div class="page-sub">Technique Pomodoro</div>
+        <div class="timer-modes">
+          <button class="mode-btn active" onclick="setMode(25,'Focus',this)">Focus 25</button>
+          <button class="mode-btn" onclick="setMode(5,'Pause courte',this)">Pause 5</button>
+          <button class="mode-btn" onclick="setMode(15,'Pause longue',this)">Long 15</button>
+          <button class="mode-btn" onclick="openCustomTimer()">Perso ✏️</button>
+        </div>
+        <div class="timer-ring">
+          <svg width="230" height="230" viewBox="0 0 230 230">
+            <circle cx="115" cy="115" r="104" fill="none" stroke="#EFF6FF" stroke-width="12"/>
+            <circle cx="115" cy="115" r="104" fill="none" stroke="#2563EB" stroke-width="12" stroke-dasharray="653.45" stroke-dashoffset="0" stroke-linecap="round" id="timer-arc" transform="rotate(-90 115 115)" style="transition:stroke-dashoffset 1s linear"/>
+          </svg>
+          <div class="timer-inner">
+            <div class="timer-digits" id="timer-display">25:00</div>
+            <div class="timer-label" id="timer-mode-label">Focus</div>
+            <div style="margin-top:8px">
+              <span id="timer-subject-tag" class="tag tag-blue" style="cursor:pointer;font-size:12px" onclick="openSubjectPicker()">+ Matière</span>
+            </div>
+          </div>
+        </div>
+        <div class="pomodoro-dots" id="pom-dots">
+          <div class="pom-dot"></div><div class="pom-dot"></div><div class="pom-dot"></div><div class="pom-dot"></div>
+        </div>
+        <div class="timer-btns">
+          <button class="btn btn-outline" onclick="resetTimer()" style="width:76px">↺</button>
+          <button class="btn btn-primary" id="timer-start-btn" onclick="toggleTimer()" style="flex:1">▶ Démarrer</button>
+          <button class="btn btn-outline" onclick="skipTimer()" style="width:76px">⏭</button>
+        </div>
+        <div class="section-title">Sessions du jour</div>
+        <div id="timer-sessions"></div>
+      </div>
+
+      <!-- TASKS -->
+      <div class="page" id="page-tasks">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div class="page-title">Mes Tâches</div>
+          <button class="btn btn-primary btn-sm" onclick="openAddTask()">+ Ajouter</button>
+        </div>
+        <div class="page-sub" id="tasks-sub">0 tâche</div>
+        <div class="card card-blue anim" style="position:relative;overflow:hidden;margin-bottom:14px">
+          <div style="color:rgba(255,255,255,.75);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Progression du jour</div>
+          <div id="tasks-percent" style="font-size:36px;font-weight:800;color:white">0%</div>
+          <div class="pbar"><div class="pbar-fill" id="tasks-progress-bar" style="width:0%"></div></div>
+          <div class="blob"></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px">
+          <button class="tag tag-blue" style="cursor:pointer;padding:7px 14px;font-size:13px;border:none" onclick="filterTasks('all',this)">Toutes</button>
+          <button class="tag" style="cursor:pointer;padding:7px 14px;font-size:13px;background:var(--bg);color:var(--text-soft);border:none" onclick="filterTasks('todo',this)">À faire</button>
+          <button class="tag" style="cursor:pointer;padding:7px 14px;font-size:13px;background:var(--bg);color:var(--text-soft);border:none" onclick="filterTasks('done',this)">Faites ✓</button>
+          <button class="tag tag-orange" style="cursor:pointer;padding:7px 14px;font-size:13px;border:none" onclick="filterTasks('urgent',this)">🔥 Urgent</button>
+        </div>
+        <div id="task-list"></div>
+      </div>
+
+      <!-- PROFILE -->
+      <div class="page" id="page-profile">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0">
+          <div class="page-title">Mon Profil</div>
+          <button class="btn btn-outline btn-sm" onclick="openEditProfile()">✏️ Modifier</button>
+        </div>
+        <div class="avatar-wrap">
+          <div class="avatar" id="profile-avatar" onclick="openEditProfile()">🎓</div>
+          <div class="profile-name" id="profile-name">Étudiant</div>
+          <div class="profile-school" id="profile-school">Mon lycée</div>
+          <div style="margin-top:8px" id="profile-class-tag"></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-box"><div class="stat-num" id="stat-sessions">0</div><div class="stat-lab">Sessions</div></div>
+          <div class="stat-box"><div class="stat-num" id="stat-hours">0h</div><div class="stat-lab">Heures totales</div></div>
+          <div class="stat-box"><div class="stat-num" id="stat-tasks-done">0</div><div class="stat-lab">Tâches ✓</div></div>
+        </div>
+        <div class="section-title">Matières & notes</div>
+        <div id="subjects-list"></div>
+        <button class="btn btn-outline btn-full" onclick="openAddSubject()">+ Ajouter une matière</button>
+        <div class="section-title">Paramètres</div>
+        <div class="card" style="cursor:pointer;margin-bottom:8px" onclick="openTimerSettings()">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-weight:700;font-size:15px">⏱ Paramètres minuteur</div><div style="font-size:12px;color:var(--text-soft);margin-top:2px">Durées Pomodoro personnalisées</div></div>
+            <div style="color:var(--text-soft);font-size:20px">›</div>
+          </div>
+        </div>
+        <div class="card" style="cursor:pointer;margin-bottom:8px" onclick="exportData()">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-weight:700;font-size:15px">📤 Exporter les données</div><div style="font-size:12px;color:var(--text-soft);margin-top:2px">Télécharger en JSON</div></div>
+            <div style="color:var(--text-soft);font-size:20px">›</div>
+          </div>
+        </div>
+        <div class="card" style="cursor:pointer;margin-bottom:30px;border-color:var(--red-bg)" onclick="confirmReset()">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-weight:700;font-size:15px;color:var(--red)">🗑 Réinitialiser l'app</div><div style="font-size:12px;color:var(--text-soft);margin-top:2px">Supprimer toutes les données</div></div>
+            <div style="color:var(--red);font-size:20px">›</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="nav">
+      <button class="nav-btn active" id="nav-home" onclick="showPage('home')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Accueil
+      </button>
+      <button class="nav-btn" id="nav-schedule" onclick="showPage('schedule')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>Emploi
+      </button>
+      <button class="nav-center" onclick="showPage('timer')">
+        <svg viewBox="0 0 24 24" fill="white" width="26" height="26"><path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+      </button>
+      <button class="nav-btn" id="nav-tasks" onclick="showPage('tasks')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>Tâches
+      </button>
+      <button class="nav-btn" id="nav-profile" onclick="showPage('profile')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>Profil
+      </button>
+    </div>
+  </div>
+  <div class="overlay" id="overlay" onclick="closeOverlayIfBg(event)"><div class="sheet" id="sheet"><div class="sheet-handle"></div><div id="sheet-content"></div></div></div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ── CONSTANTS ──
+const COLORS=['#2563EB','#16A34A','#D97706','#DC2626','#7C3AED','#0891B2','#DB2777','#EA580C','#0D9488','#65A30D'];
+const EMOJIS=['🎓','😊','🌟','💪','🦊','🐼','🎯','🚀','📚','🧠','🎵','⚽'];
+const DAY_NAMES=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+const DAY_FULL=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const MONTH=['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
+
+// ── STATE ──
+function defaultState() {
+  return {
+    profile:{name:'Étudiant',school:'Mon lycée',class:'',emoji:'🎓'},
+    subjects:[
+      {id:'s1',name:'Mathématiques',color:'#2563EB',grade:null},
+      {id:'s2',name:'Physique',color:'#16A34A',grade:null},
+      {id:'s3',name:'Histoire',color:'#7C3AED',grade:null},
+      {id:'s4',name:'Anglais',color:'#0891B2',grade:null},
+    ],
+    tasks:[],
+    schedule:[],
+    sessions:[],
+    timerSettings:{focus:25,shortBreak:5,longBreak:15},
+    pomodoroCount:0,
+  };
+}
+let S = defaultState();
+function save() { try { localStorage.setItem('gts3',JSON.stringify(S)); } catch(e){} }
+function load() { try { const d=localStorage.getItem('gts3'); if(d){ const p=JSON.parse(d); S=Object.assign(defaultState(),p); } } catch(e){} }
+load();
+
+// ── NAVIGATION ──
+let currentPage='home';
+let taskFilter='all';
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  const nb=document.getElementById('nav-'+name);
+  if(nb) nb.classList.add('active');
+  currentPage=name;
+  closeOverlay();
+  if(name==='home') renderHome();
+  if(name==='schedule') renderSchedule();
+  if(name==='tasks') renderTasks();
+  if(name==='profile') renderProfile();
+  if(name==='timer') renderTimerSessions();
+}
+
+// ── CLOCK ──
+function updateClock() {
+  const now=new Date();
+  const h=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
+  const hStr=pad(h)+':'+pad(m);
+  document.getElementById('clock-time').textContent=hStr;
+  document.getElementById('home-time').textContent=hStr;
+  const cx=44,cy=44,r=38;
+  const hAngle=((h%12)+m/60)*30;
+  const mAngle=(m+s/60)*6;
+  const toR=a=>(a-90)*Math.PI/180;
+  const hx=cx+24*Math.cos(toR(hAngle)),hy=cy+24*Math.sin(toR(hAngle));
+  const mx=cx+30*Math.cos(toR(mAngle)),my=cy+30*Math.sin(toR(mAngle));
+  document.getElementById('clock-hour').setAttribute('x2',hx);
+  document.getElementById('clock-hour').setAttribute('y2',hy);
+  document.getElementById('clock-min').setAttribute('x2',mx);
+  document.getElementById('clock-min').setAttribute('y2',my);
+  const circ=238.76;
+  document.getElementById('clock-arc').style.strokeDashoffset=circ*(1-m/60);
+}
+setInterval(updateClock,1000); updateClock();
+
+// ── HOME ──
+function renderHome() {
+  const now=new Date();
+  const h=now.getHours();
+  const greet=h<12?'Bonjour':h<18?'Bon après-midi':'Bonsoir';
+  document.getElementById('home-greeting').textContent=greet+', '+(S.profile.name||'Étudiant')+' !';
+  document.getElementById('home-avatar-btn').textContent=S.profile.emoji||'🎓';
+
+  const tod=S.schedule.filter(c=>c.day===now.getDay());
+  const nm=h*60+now.getMinutes();
+  const cur=tod.find(c=>(c.startH*60+c.startM)<=nm&&nm<(c.endH*60+c.endM));
+  if(cur){
+    const end=cur.endH*60+cur.endM,start=cur.startH*60+cur.startM;
+    const rem=end-nm,pct=Math.max(0,Math.min(100,(nm-start)/(end-start)*100));
+    document.getElementById('home-current-course').textContent=cur.name;
+    document.getElementById('home-remaining').textContent=rem+'min';
+    document.getElementById('home-pbar-fill').style.width=pct+'%';
+  } else {
+    const nxt=tod.find(c=>(c.startH*60+c.startM)>nm);
+    if(nxt){ document.getElementById('home-current-course').textContent='Prochain: '+nxt.name; document.getElementById('home-remaining').textContent='dans '+(nxt.startH*60+nxt.startM-nm)+'min'; }
+    else { document.getElementById('home-current-course').textContent='Aucun cours'; document.getElementById('home-remaining').textContent='—'; }
+    document.getElementById('home-pbar-fill').style.width='0%';
+  }
+
+  const total=S.tasks.length,done=S.tasks.filter(t=>t.done).length,rem=total-done;
+  document.getElementById('home-tasks-num').textContent=rem;
+  document.getElementById('home-tasks-sub').textContent=rem===1?'restante':'restantes';
+  document.getElementById('home-tasks-pbar').style.width=total?(done/total*100)+'%':'0%';
+
+  const todayStr=now.toDateString();
+  const todSess=S.sessions.filter(s=>new Date(s.date).toDateString()===todayStr&&s.type==='focus');
+  const todMins=todSess.reduce((a,s)=>a+s.minutes,0);
+  document.getElementById('home-study-time').textContent=todMins>=60?Math.floor(todMins/60)+'h'+(todMins%60?todMins%60+'min':''):todMins+'min';
+
+  // Week chart
+  const wk=[0,0,0,0,0,0,0];
+  S.sessions.filter(s=>s.type==='focus').forEach(s=>{
+    const d=new Date(s.date),diff=Math.floor((now-d)/86400000);
+    if(diff>=0&&diff<7) wk[d.getDay()]+=s.minutes;
+  });
+  const maxM=Math.max(...wk,1);
+  document.getElementById('home-week-total').textContent=(Math.round(wk.reduce((a,b)=>a+b,0)/60*10)/10)+'h cette semaine';
+  document.getElementById('home-bar-chart').innerHTML=wk.map((m,i)=>`<div class="bar-col"><div class="bar-rect" style="height:${Math.max(4,m/maxM*60)}px;opacity:${i===now.getDay()?1:0.25+(m/maxM*.5)}"></div><div class="bar-lbl">${DAY_NAMES[i]}</div></div>`).join('');
+
+  const nxtCourses=tod.filter(c=>(c.startH*60+c.startM)>nm).slice(0,3);
+  const nc=document.getElementById('home-next-courses');
+  if(nxtCourses.length){
+    nc.innerHTML=nxtCourses.map(c=>`<div class="sched-item anim" onclick="showPage('schedule')"><div class="sched-dot" style="background:${c.color}"></div><div class="sched-time">${pad(c.startH)}:${pad(c.startM)}</div><div><div class="sched-name">${esc(c.name)}</div><div class="sched-sub">${c.room?esc(c.room):''}</div></div></div>`).join('');
+  } else {
+    nc.innerHTML=`<div class="empty"><div class="empty-icon">📅</div><div class="empty-text">Aucun cours à venir aujourd'hui</div></div>`;
+  }
+}
+
+// ── SCHEDULE ──
+let selectedDay=new Date().getDay();
+function renderSchedule() {
+  const now=new Date();
+  document.getElementById('sched-date').textContent=DAY_FULL[selectedDay]+' · '+now.getDate()+' '+MONTH[now.getMonth()]+' '+now.getFullYear();
+  const ds=document.getElementById('day-scroll');
+  const today=now.getDay();
+  ds.innerHTML=Array.from({length:7},(_,i)=>{
+    const d=(today+i)%7;
+    const isSel=d===selectedDay;
+    return `<div class="day-pill ${isSel?'active':''}" onclick="selectDay(${d})"><div class="d-name">${i===0?'Auj':DAY_NAMES[d]}</div><div class="d-num">${d}</div></div>`;
+  }).join('');
+  const courses=S.schedule.filter(c=>c.day===selectedDay).sort((a,b)=>(a.startH*60+a.startM)-(b.startH*60+b.startM));
+  const sl=document.getElementById('schedule-list');
+  if(!courses.length){ sl.innerHTML=`<div class="empty"><div class="empty-icon">🗓</div><div class="empty-text">Aucun cours ${DAY_FULL[selectedDay].toLowerCase()}.<br>Appuyez sur + pour ajouter.</div></div>`; return; }
+  sl.innerHTML=courses.map(c=>`<div class="sched-item anim"><div class="sched-dot" style="background:${c.color}"></div><div class="sched-time">${pad(c.startH)}:${pad(c.startM)}</div><div style="flex:1"><div class="sched-name">${esc(c.name)}</div><div class="sched-sub">${pad(c.startH)}:${pad(c.startM)}–${pad(c.endH)}:${pad(c.endM)}${c.room?' · '+esc(c.room):''}</div></div><div style="display:flex;gap:4px"><button class="icon-btn" onclick="event.stopPropagation();openEditCourse('${c.id}')">✏️</button><button class="icon-btn" onclick="event.stopPropagation();deleteCourse('${c.id}')">🗑</button></div></div>`).join('');
+}
+function selectDay(d){ selectedDay=d; renderSchedule(); }
+
+function openAddCourse(id){
+  const c=id?S.schedule.find(x=>x.id===id):null;
+  openSheet(c?'Modifier le cours':'Nouveau cours',`
+    <div class="field"><label>Nom du cours</label><input id="ci-name" placeholder="ex: Mathématiques" value="${esc(c?.name||'')}"></div>
+    <div class="field"><label>Jour</label><select id="ci-day">${DAY_FULL.map((d,i)=>`<option value="${i}" ${(c?.day??selectedDay)===i?'selected':''}>${d}</option>`).join('')}</select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field"><label>Début</label><input id="ci-start" type="time" value="${c?pad(c.startH)+':'+pad(c.startM):'08:00'}"></div>
+      <div class="field"><label>Fin</label><input id="ci-end" type="time" value="${c?pad(c.endH)+':'+pad(c.endM):'10:00'}"></div>
+    </div>
+    <div class="field"><label>Salle (optionnel)</label><input id="ci-room" placeholder="ex: Salle 201" value="${esc(c?.room||'')}"></div>
+    <div class="field"><label>Couleur</label><div class="color-row" id="ci-colors">${COLORS.map(col=>`<div class="color-dot ${(c?.color||'#2563EB')===col?'selected':''}" style="background:${col}" onclick="selectColor(this,'ci-colors')" data-color="${col}"></div>`).join('')}</div></div>
+    ${c?`<button class="btn btn-danger btn-full" onclick="deleteCourse('${c.id}')">Supprimer ce cours</button>`:''}
+    <button class="btn btn-primary btn-full" style="margin-top:6px" onclick="saveCourse('${c?.id||''}')"> ${c?'Enregistrer':'Ajouter le cours'} </button>
+  `);
+}
+function openEditCourse(id){ openAddCourse(id); }
+
+function saveCourse(id){
+  const name=v('ci-name').trim();
+  if(!name){ toast('⚠️ Entrez un nom de cours'); return; }
+  const day=parseInt(v('ci-day'));
+  const [sh,sm]=v('ci-start').split(':').map(Number);
+  const [eh,em]=v('ci-end').split(':').map(Number);
+  if((eh*60+em)<=(sh*60+sm)){ toast('⚠️ Heure de fin invalide'); return; }
+  const color=document.querySelector('#ci-colors .selected')?.dataset.color||'#2563EB';
+  const room=v('ci-room').trim();
+  if(id){ const c=S.schedule.find(x=>x.id===id); if(c) Object.assign(c,{name,day,startH:sh,startM:sm,endH:eh,endM:em,color,room}); }
+  else S.schedule.push({id:uid(),name,day,startH:sh,startM:sm,endH:eh,endM:em,color,room});
+  save(); closeOverlay(); selectedDay=day; renderSchedule(); toast(id?'Cours modifié ✓':'Cours ajouté ✓');
+}
+
+function deleteCourse(id){
+  confirmAction('Supprimer ce cours ?',()=>{
+    S.schedule=S.schedule.filter(c=>c.id!==id);
+    save(); closeOverlay(); renderSchedule(); toast('Cours supprimé');
+  });
+}
+
+// ── TASKS ──
+function filterTasks(f,btn){
+  taskFilter=f;
+  document.querySelectorAll('#page-tasks button[onclick^="filterTasks"]').forEach(b=>{
+    b.style.background='var(--bg)'; b.style.color='var(--text-soft)';
+    b.className='tag';
+  });
+  const cls={all:'tag-blue',todo:'tag-blue',done:'tag-green',urgent:'tag-orange'};
+  btn.style.background=''; btn.style.color='';
+  btn.className='tag '+(cls[f]||'tag-blue');
+  renderTasks();
+}
+
+function renderTasks(){
+  let tasks=[...S.tasks];
+  if(taskFilter==='todo') tasks=tasks.filter(t=>!t.done);
+  if(taskFilter==='done') tasks=tasks.filter(t=>t.done);
+  if(taskFilter==='urgent') tasks=tasks.filter(t=>t.priority==='urgent'&&!t.done);
+  tasks.sort((a,b)=>{
+    if(a.done!==b.done) return a.done?1:-1;
+    const p={urgent:0,normal:1,low:2};
+    return (p[a.priority]||1)-(p[b.priority]||1);
+  });
+  const total=S.tasks.length,done=S.tasks.filter(t=>t.done).length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('tasks-percent').textContent=pct+'%';
+  document.getElementById('tasks-progress-bar').style.width=pct+'%';
+  document.getElementById('tasks-sub').textContent=total+' tâche'+(total!==1?'s':'')+' · '+done+' faite'+(done!==1?'s':'');
+  const tl=document.getElementById('task-list');
+  if(!tasks.length){ tl.innerHTML=`<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">${taskFilter==='done'?'Aucune tâche complétée':'Aucune tâche ici !'}</div></div>`; return; }
+  const ptag={urgent:'<span class="tag tag-red" style="font-size:10px">🔥 Urgent</span>',normal:'<span class="tag tag-blue" style="font-size:10px">Normal</span>',low:'<span class="tag" style="background:var(--bg);color:var(--text-soft);font-size:10px">Bas</span>'};
+  tl.innerHTML=tasks.map(t=>`
+    <div class="task-item anim">
+      <div class="task-check ${t.done?'done':''}" onclick="toggleTask('${t.id}')">${t.done?'✓':''}</div>
+      <div class="task-body" onclick="toggleTask('${t.id}')">
+        <div class="task-name ${t.done?'done':''}">${esc(t.name)}</div>
+        <div class="task-meta">${t.subject?esc(t.subject)+' · ':''}${t.due?'Dû: '+t.due+' · ':''}${ptag[t.priority]||''}</div>
+      </div>
+      <button class="icon-btn" onclick="openEditTask('${t.id}')">✏️</button>
+      <button class="icon-btn" onclick="deleteTask('${t.id}')">🗑</button>
+    </div>
+  `).join('');
+}
+
+function toggleTask(id){
+  const t=S.tasks.find(t=>t.id===id);
+  if(t){ t.done=!t.done; save(); renderTasks(); if(currentPage==='home') renderHome(); }
+}
+
+function openAddTask(id){
+  const t=id?S.tasks.find(x=>x.id===id):null;
+  openSheet(t?'Modifier la tâche':'Nouvelle tâche',`
+    <div class="field"><label>Nom de la tâche *</label><input id="ti-name" placeholder="ex: Exercices algèbre p.47" value="${esc(t?.name||'')}"></div>
+    <div class="field"><label>Matière</label><select id="ti-subject"><option value="">— Aucune matière —</option>${S.subjects.map(s=>`<option value="${esc(s.name)}" ${t?.subject===s.name?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div>
+    <div class="field"><label>Priorité</label><select id="ti-priority"><option value="normal" ${(t?.priority||'normal')==='normal'?'selected':''}>Normal</option><option value="urgent" ${t?.priority==='urgent'?'selected':''}>🔥 Urgent</option><option value="low" ${t?.priority==='low'?'selected':''}>Bas</option></select></div>
+    <div class="field"><label>Date limite</label><input id="ti-due" type="date" value="${t?.due||''}"></div>
+    <div class="field"><label>Notes</label><textarea id="ti-notes" placeholder="Détails, pages à lire...">${esc(t?.notes||'')}</textarea></div>
+    ${t?`<button class="btn btn-danger btn-full" onclick="deleteTask('${t.id}')">Supprimer cette tâche</button>`:''}
+    <button class="btn btn-primary btn-full" style="margin-top:6px" onclick="saveTask('${t?.id||''}')">${t?'Enregistrer':'Ajouter la tâche'}</button>
+  `);
+}
+function openEditTask(id){ openAddTask(id); }
+
+function saveTask(id){
+  const name=v('ti-name').trim();
+  if(!name){ toast('⚠️ Entrez un nom de tâche'); return; }
+  const obj={name,subject:v('ti-subject'),priority:v('ti-priority'),due:v('ti-due'),notes:v('ti-notes').trim()};
+  if(id){ const t=S.tasks.find(x=>x.id===id); if(t) Object.assign(t,obj); }
+  else S.tasks.push({id:uid(),...obj,done:false,created:Date.now()});
+  save(); closeOverlay(); renderTasks(); if(currentPage==='home') renderHome();
+  toast(id?'Tâche modifiée ✓':'Tâche ajoutée ✓');
+}
+
+function deleteTask(id){
+  confirmAction('Supprimer cette tâche ?',()=>{
+    S.tasks=S.tasks.filter(t=>t.id!==id);
+    save(); closeOverlay(); renderTasks(); toast('Tâche supprimée');
+  });
+}
+
+// ── TIMER ──
+let timerInterval=null,timerTotal=25*60,timerRemaining=25*60,timerRunning=false;
+let timerType='focus',timerSubjectId='',timerSubjectName='';
+let pomCount=S.pomodoroCount||0;
+
+function updateTimerDisplay(){
+  const m=Math.floor(timerRemaining/60),s=timerRemaining%60;
+  document.getElementById('timer-display').textContent=pad(m)+':'+pad(s);
+  const circ=653.45;
+  document.getElementById('timer-arc').style.strokeDashoffset=circ*(1-timerRemaining/timerTotal);
+}
+
+function setMode(mins,label,btn){
+  clearInterval(timerInterval); timerRunning=false;
+  document.getElementById('timer-start-btn').textContent='▶ Démarrer';
+  timerTotal=mins*60; timerRemaining=timerTotal;
+  timerType=label==='Focus'?'focus':'break';
+  document.getElementById('timer-mode-label').textContent=label;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('timer-arc').style.transition='none';
+  updateTimerDisplay();
+  setTimeout(()=>{ document.getElementById('timer-arc').style.transition='stroke-dashoffset 1s linear'; },50);
+}
+
+function openCustomTimer(){
+  openSheet('Minuteur personnalisé',`
+    <div class="field"><label>Durée en minutes</label><input id="ct-mins" type="number" min="1" max="180" value="30" placeholder="ex: 45"></div>
+    <div class="field"><label>Nom / Label</label><input id="ct-label" placeholder="ex: Révision examen" value="Personnalisé"></div>
+    <div class="field"><label>Type</label><select id="ct-type"><option value="focus">Focus (compté)</option><option value="break">Pause (non compté)</option></select></div>
+    <button class="btn btn-primary btn-full" onclick="applyCustomTimer()">Configurer</button>
+  `);
+}
+function applyCustomTimer(){
+  const mins=parseInt(v('ct-mins'))||30,label=v('ct-label')||'Perso';
+  clearInterval(timerInterval); timerRunning=false;
+  timerTotal=mins*60; timerRemaining=timerTotal;
+  timerType=v('ct-type')||'focus';
+  document.getElementById('timer-mode-label').textContent=label;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('timer-start-btn').textContent='▶ Démarrer';
+  document.getElementById('timer-arc').style.transition='none';
+  updateTimerDisplay();
+  setTimeout(()=>{ document.getElementById('timer-arc').style.transition='stroke-dashoffset 1s linear'; },50);
+  closeOverlay(); toast('Minuteur '+mins+' min prêt !');
+}
+
+function toggleTimer(){
+  if(timerRunning){
+    clearInterval(timerInterval); timerRunning=false;
+    document.getElementById('timer-start-btn').textContent='▶ Reprendre';
+  } else {
+    timerRunning=true;
+    document.getElementById('timer-start-btn').textContent='⏸ Pause';
+    timerInterval=setInterval(()=>{
+      if(timerRemaining>0){ timerRemaining--; updateTimerDisplay(); }
+      else { clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-start-btn').textContent='▶ Démarrer'; onTimerDone(); }
+    },1000);
+  }
+}
+
+function resetTimer(){
+  clearInterval(timerInterval); timerRunning=false; timerRemaining=timerTotal;
+  document.getElementById('timer-start-btn').textContent='▶ Démarrer';
+  document.getElementById('timer-arc').style.transition='none';
+  updateTimerDisplay();
+  setTimeout(()=>{ document.getElementById('timer-arc').style.transition='stroke-dashoffset 1s linear'; },50);
+}
+function skipTimer(){ clearInterval(timerInterval); timerRunning=false; timerRemaining=0; updateTimerDisplay(); onTimerDone(); }
+
+function onTimerDone(){
+  if(timerType==='focus'){
+    const mins=Math.round(timerTotal/60);
+    S.sessions.push({id:uid(),date:new Date().toISOString(),subjectId:timerSubjectId,minutes:mins,type:'focus'});
+    pomCount++; S.pomodoroCount=pomCount; save();
+    updatePomDots(); renderTimerSessions(); renderProfile();
+    toast('🎉 Session terminée ! +'+mins+' min enregistrées');
+  } else {
+    toast('☕ Pause terminée ! C\'est reparti !');
+  }
+}
+
+function updatePomDots(){
+  document.querySelectorAll('.pom-dot').forEach((d,i)=>d.classList.toggle('done',i<(pomCount%4)));
+}
+
+function openSubjectPicker(){
+  openSheet('Choisir une matière',`
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-outline" onclick="setTimerSubject('','Toutes matières')">— Sans matière</button>
+      ${S.subjects.map(s=>`<button class="btn" style="background:${s.color};color:white;text-align:left" onclick="setTimerSubject('${s.id}','${esc(s.name)}')">${esc(s.name)}</button>`).join('')}
+      ${S.subjects.length===0?'<div class="empty"><div class="empty-icon">📚</div><div class="empty-text">Ajoutez des matières dans votre profil</div></div>':''}
+    </div>
+  `);
+}
+function setTimerSubject(id,name){ timerSubjectId=id; timerSubjectName=name; document.getElementById('timer-subject-tag').textContent=name||'+ Matière'; closeOverlay(); }
+
+function renderTimerSessions(){
+  updatePomDots();
+  const today=new Date().toDateString();
+  const sess=S.sessions.filter(s=>new Date(s.date).toDateString()===today&&s.type==='focus');
+  const el=document.getElementById('timer-sessions');
+  if(!sess.length){ el.innerHTML=`<div style="font-size:13px;color:var(--text-soft);text-align:center;padding:12px 0">Aucune session aujourd'hui. Lancez le minuteur !</div>`; return; }
+  el.innerHTML=sess.slice().reverse().map(s=>{
+    const sub=S.subjects.find(x=>x.id===s.subjectId);
+    const d=new Date(s.date);
+    return `<div class="task-item anim"><div style="width:10px;height:10px;border-radius:50%;background:${sub?.color||'#2563EB'};flex-shrink:0"></div><div class="task-body"><div class="task-name">${sub?.name||'Session libre'}</div><div class="task-meta">${pad(d.getHours())}:${pad(d.getMinutes())}</div></div><span class="tag tag-blue">${s.minutes} min</span><button class="icon-btn" onclick="deleteSession('${s.id}')">🗑</button></div>`;
+  }).join('');
+}
+function deleteSession(id){ S.sessions=S.sessions.filter(s=>s.id!==id); save(); renderTimerSessions(); renderProfile(); }
+
+// ── PROFILE ──
+function renderProfile(){
+  const p=S.profile;
+  document.getElementById('profile-avatar').textContent=p.emoji||'🎓';
+  document.getElementById('profile-name').textContent=p.name||'Étudiant';
+  document.getElementById('profile-school').textContent=p.school||'';
+  document.getElementById('profile-class-tag').innerHTML=p.class?`<span class="tag tag-blue">${esc(p.class)}</span>`:'';
+
+  const focusSess=S.sessions.filter(s=>s.type==='focus');
+  const totalMins=focusSess.reduce((a,s)=>a+s.minutes,0);
+  document.getElementById('stat-sessions').textContent=focusSess.length;
+  document.getElementById('stat-hours').textContent=(totalMins/60).toFixed(1)+'h';
+  document.getElementById('stat-tasks-done').textContent=S.tasks.filter(t=>t.done).length;
+
+  const sl=document.getElementById('subjects-list');
+  if(!S.subjects.length){ sl.innerHTML=`<div class="empty"><div class="empty-icon">📚</div><div class="empty-text">Aucune matière. Ajoutez-en une !</div></div>`; return; }
+  sl.innerHTML=S.subjects.map(s=>`
+    <div class="subject-item anim">
+      <div class="subject-dot" style="background:${s.color}"></div>
+      <div class="subject-name">${esc(s.name)}</div>
+      <div class="grade-bar-wrap"><div class="grade-bar" style="background:${s.color};width:${s.grade!==null&&s.grade!==undefined?s.grade/20*100:0}%"></div></div>
+      <div class="grade-val" style="color:${s.color}">${s.grade!==null&&s.grade!==undefined?s.grade+'/20':'—'}</div>
+      <button class="icon-btn" onclick="openEditSubject('${s.id}')">✏️</button>
+      <button class="icon-btn" onclick="deleteSubject('${s.id}')">🗑</button>
+    </div>
+  `).join('');
+}
+
+let _selEmoji=S.profile.emoji||'🎓';
+function openEditProfile(){
+  _selEmoji=S.profile.emoji||'🎓';
+  const p=S.profile;
+  openSheet('Modifier le profil',`
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Avatar</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+        ${EMOJIS.map(e=>`<div style="font-size:28px;cursor:pointer;padding:7px;border-radius:12px;border:2px solid ${p.emoji===e?'var(--blue)':'transparent'};transition:all .2s" onclick="selectEmoji(this,'${e}')" data-emoji="${e}">${e}</div>`).join('')}
+      </div>
+    </div>
+    <div class="field"><label>Prénom / Nom *</label><input id="pi-name" placeholder="Votre nom" value="${esc(p.name||'')}"></div>
+    <div class="field"><label>École / Lycée</label><input id="pi-school" placeholder="ex: Lycée Victor Hugo" value="${esc(p.school||'')}"></div>
+    <div class="field"><label>Classe</label><input id="pi-class" placeholder="ex: Terminale S, 3ème B..." value="${esc(p.class||'')}"></div>
+    <button class="btn btn-primary btn-full" onclick="saveProfile()">Enregistrer le profil</button>
+  `);
+}
+function selectEmoji(el,emoji){
+  _selEmoji=emoji;
+  document.querySelectorAll('[data-emoji]').forEach(e=>e.style.borderColor='transparent');
+  el.style.borderColor='var(--blue)';
+}
+function saveProfile(){
+  const name=v('pi-name').trim()||'Étudiant';
+  S.profile={...S.profile,name,school:v('pi-school').trim(),class:v('pi-class').trim(),emoji:_selEmoji};
+  save(); closeOverlay(); renderProfile(); renderHome(); toast('Profil enregistré ✓');
+}
+
+function openAddSubject(id){
+  const s=id?S.subjects.find(x=>x.id===id):null;
+  openSheet(s?'Modifier la matière':'Nouvelle matière',`
+    <div class="field"><label>Nom de la matière *</label><input id="si-name" placeholder="ex: Mathématiques" value="${esc(s?.name||'')}"></div>
+    <div class="field"><label>Note actuelle (/20)</label><input id="si-grade" type="number" min="0" max="20" step="0.5" placeholder="ex: 14.5" value="${s?.grade??''}"></div>
+    <div class="field"><label>Couleur</label><div class="color-row" id="si-colors">${COLORS.map(c=>`<div class="color-dot ${(s?.color||'#2563EB')===c?'selected':''}" style="background:${c}" onclick="selectColor(this,'si-colors')" data-color="${c}"></div>`).join('')}</div></div>
+    ${s?`<button class="btn btn-danger btn-full" onclick="deleteSubject('${s.id}')">Supprimer cette matière</button>`:''}
+    <button class="btn btn-primary btn-full" style="margin-top:6px" onclick="saveSubject('${s?.id||''}')">${s?'Enregistrer':'Ajouter la matière'}</button>
+  `);
+}
+function openEditSubject(id){ openAddSubject(id); }
+function saveSubject(id){
+  const name=v('si-name').trim();
+  if(!name){ toast('⚠️ Entrez un nom de matière'); return; }
+  const gv=v('si-grade').trim(),grade=gv!==''?parseFloat(gv):null;
+  const color=document.querySelector('#si-colors .selected')?.dataset.color||'#2563EB';
+  if(id){ const s=S.subjects.find(x=>x.id===id); if(s) Object.assign(s,{name,grade,color}); }
+  else S.subjects.push({id:uid(),name,grade,color});
+  save(); closeOverlay(); renderProfile(); toast(id?'Matière modifiée ✓':'Matière ajoutée ✓');
+}
+function deleteSubject(id){
+  confirmAction('Supprimer cette matière ?',()=>{ S.subjects=S.subjects.filter(s=>s.id!==id); save(); closeOverlay(); renderProfile(); toast('Matière supprimée'); });
+}
+function openTimerSettings(){
+  const ts=S.timerSettings;
+  openSheet('Paramètres Pomodoro',`
+    <div class="field"><label>Durée Focus (min)</label><input id="ts-focus" type="number" min="1" max="120" value="${ts.focus}"></div>
+    <div class="field"><label>Pause courte (min)</label><input id="ts-short" type="number" min="1" max="30" value="${ts.shortBreak}"></div>
+    <div class="field"><label>Pause longue (min)</label><input id="ts-long" type="number" min="1" max="60" value="${ts.longBreak}"></div>
+    <button class="btn btn-primary btn-full" onclick="saveTimerSettings()">Enregistrer</button>
+  `);
+}
+function saveTimerSettings(){
+  S.timerSettings={focus:parseInt(v('ts-focus'))||25,shortBreak:parseInt(v('ts-short'))||5,longBreak:parseInt(v('ts-long'))||15};
+  save(); closeOverlay(); toast('Paramètres enregistrés ✓');
+}
+function exportData(){
+  const json=JSON.stringify(S,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='gestion-temps-scolaire.json'; a.click();
+  URL.revokeObjectURL(url); toast('Export téléchargé ✓');
+}
+function confirmReset(){
+  confirmAction('⚠️ Supprimer TOUTES les données ? Action irréversible.',()=>{ localStorage.removeItem('gts3'); S=defaultState(); save(); closeOverlay(); renderHome(); renderProfile(); renderTasks(); renderSchedule(); renderTimerSessions(); toast('Application réinitialisée'); });
+}
+
+// ── OVERLAY / SHEET ──
+let _confirmCb=null;
+function openSheet(title,html){ document.getElementById('sheet-content').innerHTML=`<div class="sheet-title">${title}</div>${html}`; document.getElementById('overlay').classList.add('open'); }
+function closeOverlay(){ document.getElementById('overlay').classList.remove('open'); }
+function closeOverlayIfBg(e){ if(e.target===document.getElementById('overlay')) closeOverlay(); }
+function confirmAction(msg,cb){ _confirmCb=cb; openSheet('Confirmation',`<div style="font-size:15px;color:var(--text);margin-bottom:20px;line-height:1.5">${msg}</div><div style="display:flex;gap:10px"><button class="btn btn-outline" style="flex:1" onclick="closeOverlay()">Annuler</button><button class="btn btn-danger" style="flex:1" onclick="_runConfirm()">Confirmer</button></div>`); }
+function _runConfirm(){ if(_confirmCb){ _confirmCb(); _confirmCb=null; } }
+function selectColor(el,cid){ document.querySelectorAll('#'+cid+' .color-dot').forEach(d=>d.classList.remove('selected')); el.classList.add('selected'); }
+
+// ── TOAST ──
+let _toastTimer;
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(_toastTimer); _toastTimer=setTimeout(()=>el.classList.remove('show'),2400); }
+
+// ── UTILS ──
+function uid(){ return Math.random().toString(36).slice(2,10); }
+function pad(n){ return String(n).padStart(2,'0'); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function v(id){ return document.getElementById(id)?.value||''; }
+
+// ── INIT ──
+pomCount=S.pomodoroCount||0;
+renderHome();
+updateTimerDisplay();
+renderTimerSessions();
+setInterval(()=>{ if(currentPage==='home') renderHome(); },30000);
+</script>
+</body>
+</html>
